@@ -27,11 +27,11 @@ public class Main {
         fillBox();
         fillRow();
         fillCol();
-        writeValue();
+        elimination();
         printMatrix();
     }
 
-    private static void writeValue() {
+    private static void elimination() {
         for (int row = 0; row < n; row++) {
             for (int col = 0; col < n; col++) {
                 if (matrix[row][col][0] == 0 ){
