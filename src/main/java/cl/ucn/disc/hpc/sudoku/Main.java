@@ -4,9 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 @Slf4j
 public class Main {
@@ -28,7 +26,96 @@ public class Main {
         fillRow();
         fillCol();
         elimination();
+        loneRanger();
         printMatrix();
+    }
+
+    private static void loneRanger() {
+        loneRangerBox();
+    }
+
+    private static void loneRangerBox() {
+
+        int rowBound = 0;
+        int colBound = 0;
+        int aux = 0;
+        List<Integer> possibleValues;
+        for (int i =0; i < n; i++) {
+            possibleValues = new ArrayList<Integer>(n*n);
+            if (aux == sqrt){
+                rowBound += sqrt;
+                aux = 0;
+                colBound = 0;
+            }
+
+            int itRow = 0;
+
+            for (int j = rowBound; itRow < sqrt; j++, itRow++){
+                int itCol = 0;
+                for (int k = colBound; itCol < sqrt; k++, itCol++) {
+                    int value = matrix[j][k][0];
+                    if (value == 0){
+                        for (int l = 1; l <= n; l++) {
+                            int possibleValue = matrix[j][k][l];
+                            if (possibleValue > 0) {
+                                possibleValues.add(possibleValue);
+                            }
+                        }
+                    }
+                }
+            }
+            Set<Integer> set =  new HashSet<Integer>(possibleValues);
+            possibleValues.clear();
+            possibleValues.addAll(set);
+            int auxSize =  possibleValues.size();
+
+            int auxList[][] = new int[auxSize][2];
+            for (int j = 0; j < auxSize; j++) {
+                auxList[j][0] = possibleValues.get(j);
+            }
+
+            itRow = 0;
+            for (int j = rowBound; itRow < sqrt; j++, itRow++){
+                int itCol = 0;
+                for (int k = colBound; itCol < sqrt; k++, itCol++) {
+                    int value = matrix[j][k][0];
+                    if (value == 0){
+                        for (int l = 1; l <= n; l++) {
+                            int val = matrix[j][k][l];
+                            if (val > 0) {
+                                int index = possibleValues.indexOf(val);
+                                auxList[index][1] += 1;
+                            }
+
+
+                        }
+                    }
+                }
+            }
+            for (int m = 0; m < auxSize; m++) {
+                if (auxList[m][1] == 1) {
+                    itRow = 0;
+                    for (int j = rowBound; itRow < sqrt; j++, itRow++){
+                        int itCol = 0;
+                        for (int k = colBound; itCol < sqrt; k++, itCol++) {
+                            int value = matrix[j][k][0];
+                            if (value == 0){
+                                for (int l = 1; l <= n; l++) {
+                                    int val = matrix[j][k][l];
+                                    if (val == auxList[m][0]) {
+                                        matrix[j][k][0] = val;
+                                        log.debug("Work in {},{} with val {}",j, k, val);
+                                    }
+
+
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
     }
 
     private static void elimination() {
