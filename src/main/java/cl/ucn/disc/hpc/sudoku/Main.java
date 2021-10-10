@@ -29,15 +29,17 @@ public class Main {
         fillCol();
 
         while (!solved()){
-            elimination();
+            //elimination();
             loneRanger();
         }
+
 
         printMatrix();
     }
 
     private static void loneRanger() {
-        loneRangerBox();
+        //loneRangerBox();
+        loneRangerRow();
     }
 
     private static void loneRangerBox() {
@@ -122,6 +124,66 @@ public class Main {
             }
         }
 
+    }
+
+    private static void loneRangerRow() {
+
+        List<Integer> possibleValues;
+
+        for (int row = 0; row < n; row++) {
+            possibleValues = new ArrayList<Integer>(n*n);
+            for (int col = 0; col < n; col++) {
+                for (int indexPossibleValue = 1; indexPossibleValue <= n; indexPossibleValue++) {
+                    int possibleValue = sudoku[row][col][indexPossibleValue];
+                    if (possibleValue > 0) {
+                        possibleValues.add(possibleValue);
+                    }
+                }
+            }
+            Set<Integer> set =  new HashSet<Integer>(possibleValues);
+            possibleValues.clear();
+            possibleValues.addAll(set);
+            int auxSize =  possibleValues.size();
+
+            int auxList[][] = new int[auxSize][2];
+            for (int j = 0; j < auxSize; j++) {
+                auxList[j][0] = possibleValues.get(j);
+            }
+
+            for (int col = 0; col < n; col++) {
+                for (int l = 1; l <= n; l++) {
+                    int val = sudoku[row][col][l];
+                    if (val > 0) {
+                        int index = possibleValues.indexOf(val);
+                        auxList[index][1] += 1;
+                    }
+
+                }
+            }
+
+            for (int m = 0; m < auxSize; m++) {
+                if (auxList[m][1] == 1) {
+                    for (int row2 = 0; row2 < n; row++) {
+                        possibleValues = new ArrayList<Integer>(n*n);
+                        for (int col = 0; col < n; col++) {
+                            int value = sudoku[row2][col][0];
+                            if (value == 0){
+                                for (int l = 1; l <= n; l++) {
+                                    int val = sudoku[row2][col][l];
+                                    if (val == auxList[m][0]) {
+                                        sudoku[row2][col][0] = val;
+                                        log.debug("Work in {},{} with val {}",row2, col , val);
+                                    }
+
+
+                                }
+
+                        }}
+
+            }
+                }
+            }
+        }
     }
 
     private static void elimination() {
@@ -326,13 +388,13 @@ public class Main {
                     if (line.charAt(j) != ','){
                         numStr += line.charAt(j);
                     }else{
-                        sudoku[i][col][0] = Integer.parseInt(numStr);
+                        solution[i][col][0] = Integer.parseInt(numStr);
                         col++;
                         numStr = "";
                     }
                 }
 
-                sudoku[i][col][0] = Integer.parseInt(numStr);
+                solution[i][col][0] = Integer.parseInt(numStr);
 
             }} catch (FileNotFoundException e) {
             System.out.println("An error occurred.");
