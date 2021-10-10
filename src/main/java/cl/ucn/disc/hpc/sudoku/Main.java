@@ -29,7 +29,7 @@ public class Main {
         fillCol();
 
         while (!solved()){
-            //elimination();
+            elimination();
             loneRanger();
         }
 
@@ -38,8 +38,9 @@ public class Main {
     }
 
     private static void loneRanger() {
-        //loneRangerBox();
+        loneRangerBox();
         loneRangerRow();
+        loneRangerCol();
     }
 
     private static void loneRangerBox() {
@@ -112,7 +113,6 @@ public class Main {
                                     int val = sudoku[j][k][l];
                                     if (val == auxList[m][0]) {
                                         sudoku[j][k][0] = val;
-                                        log.debug("Work in {},{} with val {}",j, k, val);
                                     }
 
 
@@ -172,7 +172,6 @@ public class Main {
                                     int val = sudoku[row2][col][l];
                                     if (val == auxList[m][0]) {
                                         sudoku[row2][col][0] = val;
-                                        log.debug("Work in {},{} with val {}",row2, col , val);
                                     }
 
 
@@ -184,6 +183,66 @@ public class Main {
                 }
             }
         }
+    }
+
+    private static void loneRangerCol() {
+
+        List<Integer> possibleValues;
+
+        for (int col = 0; col < n; col++) {
+            possibleValues = new ArrayList<Integer>(n*n);
+            for (int row = 0; row < n; row++) {
+                for (int indexPossibleValue = 1; indexPossibleValue <= n; indexPossibleValue++) {
+                    int possibleValue = sudoku[row][col][indexPossibleValue];
+                    if (possibleValue > 0) {
+                        possibleValues.add(possibleValue);
+                    }
+                }
+            }
+            Set<Integer> set =  new HashSet<Integer>(possibleValues);
+            possibleValues.clear();
+            possibleValues.addAll(set);
+            int auxSize =  possibleValues.size();
+
+            int auxList[][] = new int[auxSize][2];
+            for (int j = 0; j < auxSize; j++) {
+                auxList[j][0] = possibleValues.get(j);
+            }
+
+            for (int row = 0; row < n; row++) {
+                for (int l = 1; l <= n; l++) {
+                    int val = sudoku[row][col][l];
+                    if (val > 0) {
+                        int index = possibleValues.indexOf(val);
+                        auxList[index][1] += 1;
+                    }
+
+                }
+            }
+
+            for (int m = 0; m < auxSize; m++) {
+                if (auxList[m][1] == 1) {
+                    for (int col2 = 0; col2 < n; col++) {
+                        possibleValues = new ArrayList<Integer>(n*n);
+                        for (int row = 0; row < n; row++) {
+                            int value = sudoku[row][col2][0];
+                            if (value == 0){
+                                for (int l = 1; l <= n; l++) {
+                                    int val = sudoku[row][col2][l];
+                                    if (val == auxList[m][0]) {
+                                        sudoku[row][col2][0] = val;
+                                    }
+
+
+                                }
+
+                            }}
+
+                    }
+                }
+            }
+        }
+
     }
 
     private static void elimination() {
