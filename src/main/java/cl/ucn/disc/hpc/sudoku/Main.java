@@ -9,9 +9,11 @@ import java.util.*;
 @Slf4j
 public class Main {
 
-    private static int[][][] matrix;
+    private static int[][][] sudoku;
+    private static int[][][] solution;
     private static int n;
     private static int sqrt;
+    private static boolean solved = false;
 
     public static void main(String[] args) {
         readFile();
@@ -25,8 +27,12 @@ public class Main {
         fillBox();
         fillRow();
         fillCol();
-        elimination();
-        loneRanger();
+
+        while (!solved()){
+            elimination();
+            loneRanger();
+        }
+
         printMatrix();
     }
 
@@ -53,10 +59,10 @@ public class Main {
             for (int j = rowBound; itRow < sqrt; j++, itRow++){
                 int itCol = 0;
                 for (int k = colBound; itCol < sqrt; k++, itCol++) {
-                    int value = matrix[j][k][0];
+                    int value = sudoku[j][k][0];
                     if (value == 0){
                         for (int l = 1; l <= n; l++) {
-                            int possibleValue = matrix[j][k][l];
+                            int possibleValue = sudoku[j][k][l];
                             if (possibleValue > 0) {
                                 possibleValues.add(possibleValue);
                             }
@@ -78,10 +84,10 @@ public class Main {
             for (int j = rowBound; itRow < sqrt; j++, itRow++){
                 int itCol = 0;
                 for (int k = colBound; itCol < sqrt; k++, itCol++) {
-                    int value = matrix[j][k][0];
+                    int value = sudoku[j][k][0];
                     if (value == 0){
                         for (int l = 1; l <= n; l++) {
-                            int val = matrix[j][k][l];
+                            int val = sudoku[j][k][l];
                             if (val > 0) {
                                 int index = possibleValues.indexOf(val);
                                 auxList[index][1] += 1;
@@ -98,12 +104,12 @@ public class Main {
                     for (int j = rowBound; itRow < sqrt; j++, itRow++){
                         int itCol = 0;
                         for (int k = colBound; itCol < sqrt; k++, itCol++) {
-                            int value = matrix[j][k][0];
+                            int value = sudoku[j][k][0];
                             if (value == 0){
                                 for (int l = 1; l <= n; l++) {
-                                    int val = matrix[j][k][l];
+                                    int val = sudoku[j][k][l];
                                     if (val == auxList[m][0]) {
-                                        matrix[j][k][0] = val;
+                                        sudoku[j][k][0] = val;
                                         log.debug("Work in {},{} with val {}",j, k, val);
                                     }
 
@@ -121,22 +127,22 @@ public class Main {
     private static void elimination() {
         for (int row = 0; row < n; row++) {
             for (int col = 0; col < n; col++) {
-                if (matrix[row][col][0] == 0 ){
+                if (sudoku[row][col][0] == 0 ){
 
                     int counter = 0;
                     int num = 0;
                     for (int possible = 1; possible <= n; possible++) {
 
-                        if (matrix[row][col][possible] > 0){
+                        if (sudoku[row][col][possible] > 0){
                             counter++;
-                            num = matrix[row][col][possible];
+                            num = sudoku[row][col][possible];
                         }
                         if (counter > 1){
                             break;
                         }
                     }
                     if (counter == 1){
-                        matrix[row][col][0] = num;
+                        sudoku[row][col][0] = num;
                     }
 
                 }
@@ -157,7 +163,7 @@ public class Main {
             for (int row = 0; row < n; row++) {
 
                 // Save value
-                int value = matrix[row][col][0];
+                int value = sudoku[row][col][0];
 
                 // if cell is not free
                 if (value > 0) {
@@ -172,8 +178,8 @@ public class Main {
             for (int num: noPossibleList) {
                 for (int row2 = 0; row2 < n; row2++) {
                     for (int idPossible = 1; idPossible <= n; idPossible++) {
-                        if (num == matrix[row2][col][idPossible]) {
-                            matrix[row2][col][idPossible] = 0;
+                        if (num == sudoku[row2][col][idPossible]) {
+                            sudoku[row2][col][idPossible] = 0;
                             break;
                         }
                     }
@@ -197,7 +203,7 @@ public class Main {
             for (int col = 0; col < n; col++) {
 
                 // Save value
-                int value = matrix[row][col][0];
+                int value = sudoku[row][col][0];
 
                 // if cell is not free
                 if (value > 0) {
@@ -212,8 +218,8 @@ public class Main {
             for (int num: noPossibleList) {
                 for (int col2 = 0; col2 < n; col2++) {
                     for (int idPossible = 1; idPossible <= n; idPossible++) {
-                        if (num == matrix[row][col2][idPossible]) {
-                            matrix[row][col2][idPossible] = 0;
+                        if (num == sudoku[row][col2][idPossible]) {
+                            sudoku[row][col2][idPossible] = 0;
                             break;
                         }
                     }
@@ -243,7 +249,7 @@ public class Main {
             for (int j = rowBound; itRow < sqrt; j++, itRow++){
                 int itCol = 0;
                 for (int k = colBound; itCol < sqrt; k++, itCol++) {
-                    int value = matrix[j][k][0];
+                    int value = sudoku[j][k][0];
                     if (value > 0){
                         list.add(value);
                     }
@@ -254,12 +260,12 @@ public class Main {
             for (int j = rowBound; itRow < sqrt; j++, itRow++){
                 int itCol = 0;
                 for (int k = colBound; itCol < sqrt; k++, itCol++) {
-                    int value = matrix[j][k][0];
+                    int value = sudoku[j][k][0];
                     if (value == 0){
                         int iterator = 1;
                         for (int l = 1; l <= n; l++) {
                             if (!list.contains(l)){
-                                matrix[j][k][iterator] = l;
+                                sudoku[j][k][iterator] = l;
                                 iterator++;
                             }
                         }
@@ -280,7 +286,7 @@ public class Main {
             Scanner myReader = new Scanner(myObj);
             n = Integer.parseInt(myReader.nextLine());
             sqrt = (int) Math.sqrt(n);
-            matrix = new int[n][n][n+1];
+            sudoku = new int[n][n][n+1];
 
             for(int i =0; i < n; i++) {
                 String line = myReader.nextLine();
@@ -291,24 +297,52 @@ public class Main {
                     if (line.charAt(j) != ','){
                         numStr += line.charAt(j);
                     }else{
-                        matrix[i][col][0] = Integer.parseInt(numStr);
+                        sudoku[i][col][0] = Integer.parseInt(numStr);
                         col++;
                         numStr = "";
                     }
                 }
 
-                matrix[i][col][0] = Integer.parseInt(numStr);
+                sudoku[i][col][0] = Integer.parseInt(numStr);
 
             }} catch (FileNotFoundException e) {
             System.out.println("An error occurred.");
-            e.printStackTrace();
+        }
+
+        try {
+
+            File myObj = new File("src/main/resources/9x9-solved.txt");
+            Scanner myReader = new Scanner(myObj);
+            n = Integer.parseInt(myReader.nextLine());
+            sqrt = (int) Math.sqrt(n);
+            solution = new int[n][n][n+1];
+
+            for(int i =0; i < n; i++) {
+                String line = myReader.nextLine();
+                int size = line.length();
+                String numStr = "";
+                int col = 0;
+                for(int j = 0; j < size; j++){
+                    if (line.charAt(j) != ','){
+                        numStr += line.charAt(j);
+                    }else{
+                        sudoku[i][col][0] = Integer.parseInt(numStr);
+                        col++;
+                        numStr = "";
+                    }
+                }
+
+                sudoku[i][col][0] = Integer.parseInt(numStr);
+
+            }} catch (FileNotFoundException e) {
+            System.out.println("An error occurred.");
         }
     }
 
     private static void printMatrix() {
         for (int row = 0; row <n; row++){
             for (int col = 0; col < n; col++) {
-                int num = matrix[row][col][0];
+                int num = sudoku[row][col][0];
                 if (num < 10) {
                     System.out.print("0");
                 }
@@ -323,5 +357,17 @@ public class Main {
             }
             System.out.println();
         }
+    }
+
+    private static boolean solved() {
+        for (int row = 0; row < n; row++) {
+            for (int col = 0; col < n; col++) {
+                if (sudoku[row][col][0] != solution[row][col][0]){
+                    return false;
+                }
+            }
+
+        }
+        return true;
     }
 }
