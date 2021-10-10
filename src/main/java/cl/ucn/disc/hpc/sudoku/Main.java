@@ -28,18 +28,18 @@ public class Main {
                 String line = myReader.nextLine();
                 int size = line.length();
                 String numStr = "";
-                int row = 0;
+                int col = 0;
                 for(int j = 0; j < size; j++){
                     if (line.charAt(j) != ','){
                         numStr += line.charAt(j);
                     }else{
-                        matrix[i][row] = Integer.parseInt(numStr);
-                        row++;
+                        matrix[i][col] = Integer.parseInt(numStr);
+                        col++;
                         numStr = "";
                     }
                 }
 
-                matrix[i][row] = Integer.parseInt(numStr);
+                matrix[i][col] = Integer.parseInt(numStr);
 
             }} catch (FileNotFoundException e) {
             System.out.println("An error occurred.");
