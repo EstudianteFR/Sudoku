@@ -26,6 +26,46 @@ public class Main {
 
         fillBox();
         fillRow();
+        fillCol();
+    }
+
+    private static void fillCol() {
+
+        // For each row
+        for (int col = 0; col < n; col++) {
+
+            // list of no possibles
+            List<Integer> noPossibleList = new ArrayList<Integer>(n);
+
+            // For each column
+            for (int row = 0; row < n; row++) {
+
+                // Save value
+                int value = matrix[row][col][0];
+
+                // if cell is not free
+                if (value > 0) {
+
+                    // add to no possibles
+                    noPossibleList.add(value);
+                }
+            }
+
+            // now I have all no possibles values
+
+            for (int num: noPossibleList) {
+                for (int row2 = 0; row2 < n; row2++) {
+                    for (int idPossible = 1; idPossible <= n; idPossible++) {
+                        if (num == matrix[row2][col][idPossible]) {
+                            matrix[row2][col][idPossible] = 0;
+                            break;
+                        }
+                    }
+
+                }
+            }
+
+        }
 
     }
 
