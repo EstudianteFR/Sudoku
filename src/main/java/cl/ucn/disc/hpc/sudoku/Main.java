@@ -27,6 +27,35 @@ public class Main {
         fillBox();
         fillRow();
         fillCol();
+        writeValue();
+        printMatrix();
+    }
+
+    private static void writeValue() {
+        for (int row = 0; row < n; row++) {
+            for (int col = 0; col < n; col++) {
+                if (matrix[row][col][0] == 0 ){
+
+                    int counter = 0;
+                    int num = 0;
+                    for (int possible = 1; possible <= n; possible++) {
+
+                        if (matrix[row][col][possible] > 0){
+                            counter++;
+                            num = matrix[row][col][possible];
+                        }
+                        if (counter > 1){
+                            break;
+                        }
+                    }
+                    if (counter == 1){
+                        matrix[row][col][0] = num;
+                    }
+
+                }
+
+            }
+        }
     }
 
     private static void fillCol() {
