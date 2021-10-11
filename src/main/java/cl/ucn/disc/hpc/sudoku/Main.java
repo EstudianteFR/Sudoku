@@ -31,18 +31,14 @@ public class Main {
 
         for (int i = 0; i < 10; i++) {
             elimination();
-            log.debug("finished elimination");
 
             loneRanger();
-            log.debug("finished lone ranger");
 
-            //twins();
-            //log.debug("finished twins");
         }
 
 
         if (solved()) {
-            log.debug("Congrats");
+            System.out.println("Sudoku solved!");
         }
 
         printMatrix();
@@ -86,7 +82,7 @@ public class Main {
                             sudoku[row][col][0] = generallValues[posMin][0];
                             cleanPossibleValues(row, col);
                             col = n;
-                            log.debug("newLRR -- sudoku[{}][{}]= {}", row, col, generallValues[possibleValues][0]);
+
                             break;
                         }
                     }
@@ -148,7 +144,7 @@ public class Main {
                             }
 
                             for (int i = 1; i <= maxL - 1; i++) {
-                                log.debug("TWINS -- sudoku[{}][{}][{}] = {}",row,col,i,coincidencesList.get(i-1));
+
                                 sudoku[row][col][i] = coincidencesList.get(i - 1);
 
                             }
@@ -163,11 +159,11 @@ public class Main {
 
     private static void loneRanger() {
         loneRangerBox();
-        log.debug("finished loneRangerBox");
+
         loneRangerCol();
-        log.debug("finished loneRangerCol");
+
         loneRangerRow();
-        log.debug("finished loneRangerRow");
+
 
     }
 
@@ -240,7 +236,7 @@ public class Main {
                                 for (int l = 1; l <= n; l++) {
                                     int val = sudoku[j][k][l];
                                     if (val == auxList[m][0]) {
-                                        log.debug("LRB -- sudoku[{}][{}] = {}",j,k,val);
+
                                         sudoku[j][k][0] = val;
                                         cleanPossibleValues(j,k);
                                     }
@@ -343,7 +339,7 @@ public class Main {
                                 // if possible value coincide with the unique value
                                 if (val == uniqueValue) {
 
-                                    log.debug("LRR - sudoku[{}][{}]={}", row, col, uniqueValue);
+
                                     sudoku[row][col][0] = uniqueValue;
                                     cleanPossibleValues(row,col);
                                     uniquesList[m][1] = -1;
@@ -355,7 +351,7 @@ public class Main {
 
                         }
                     }
-                    log.debug("HERE");
+
                 }
             }
         }
@@ -447,7 +443,7 @@ public class Main {
                                 // if possible value coincide with the unique value
                                 if (val == uniqueValue) {
 
-                                    log.debug("LRC - sudoku[{}][{}]={}", row, col, uniqueValue);
+
                                     sudoku[row][col][0] = uniqueValue;
                                     cleanPossibleValues(row,col);
                                     uniquesList[m][1] = -1;
@@ -459,7 +455,7 @@ public class Main {
 
                         }
                     }
-                    log.debug("HERE");
+
                 }
             }
         }
@@ -486,7 +482,7 @@ public class Main {
                     }
                     if (counter == 1){
                         sudoku[row][col][0] = num;
-                        log.debug("ELI - sudoku[{}][{}]={}", row, col, num);
+
                         cleanPossibleValues(row, col);
                     }
 
@@ -706,9 +702,6 @@ public class Main {
 
     private static void cleanPossibleValues (int row, int col){
 
-        if (row == 0 && col == 6) {
-            log.debug("her");
-        }
 
         int val = sudoku[row][col][0];
 
@@ -798,7 +791,7 @@ public class Main {
         for (int row = 0; row < n; row++) {
             for (int col = 0; col < n; col++) {
                 if (sudoku[row][col][0] != solution[row][col][0]){
-                    log.debug("row: {}    col: {}",row,col);
+
                     return false;
                 }
             }
