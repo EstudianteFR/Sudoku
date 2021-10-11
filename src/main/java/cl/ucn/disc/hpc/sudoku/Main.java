@@ -1,10 +1,14 @@
 package cl.ucn.disc.hpc.sudoku;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.StopWatch;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 @Slf4j
@@ -16,31 +20,50 @@ public class Main {
     private static int sqrt;
     private static boolean solved = false;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
+
         readFile();
-        log.debug("start");
-        percentageSolved();
         fillOptions();
+
     }
 
-    private static void fillOptions() {
+    private static void fillOptions() throws InterruptedException {
 
         fillBox();
         fillRow();
         fillCol();
 
+        // the watch
+        StopWatch sw = StopWatch.createStarted();
 
-        for (int i = 0; i < 1000; i++) {
-            //elimination();
+        // max cores to use
+        final int maxCores = Runtime.getRuntime().availableProcessors() + 1;
 
-            //loneRanger();
+        // the executor of threads
+        final ExecutorService executor = Executors.newFixedThreadPool(maxCores);
 
+        for (int i = 1; i <= maxCores; i++) {
+            System.out.println("Work with "+ i +" cores");
+            while (!solved()){
+                executor.submit( () -> {
 
-            //twins();
+                            elimination();
 
-            //triplets();
+                            loneRanger();
+                        }
+                );
+            }
 
         }
+        executor.shutdown();
+        int maxTime = 3;
+
+        if (executor.awaitTermination(maxTime, TimeUnit.SECONDS)) {
+            System.out.println("Time over! Sudoku has not resolved");
+        } else {
+            System.out.println("Sudoku not solved");
+        }
+
 
         solve(sudoku);
 
@@ -950,7 +973,7 @@ public class Main {
             }
         }
 
-        double percentage = (100 * counter) / pot;
+        double percentage = 100 * counter / pot;
         log.debug("Counter: {}", counter);
         log.debug("The percentage solved is: {}", percentage );
 
