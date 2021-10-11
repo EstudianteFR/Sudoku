@@ -29,17 +29,15 @@ public class Main {
         fillCol();
 
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 100000; i++) {
             elimination();
 
             loneRanger();
 
+            twins();
         }
 
 
-        if (solved()) {
-            System.out.println("Sudoku solved!");
-        }
 
         printMatrix();
     }
@@ -96,57 +94,93 @@ public class Main {
 
     private static void twins() {
 
+        int twinCol1 = 0;
+        int twinCol2 = 0;
+        int twinRow = 0;
+
+        // must exit only one pair of twins
+        int twins = 0;
+
         // for each row
         for (int row = 0; row < n; row++) {
+
+            // the coincidences
+            List<Integer> coincidencesList = coincidencesList = new ArrayList<Integer>(n);
 
             // for each column
             for (int col = 0; col < n; col++) {
 
+                // search for possibles values
                 List<Integer> list = new ArrayList<Integer>(n);
                 for (int possibleValue = 1; possibleValue <= n; possibleValue++) {
-                    list.add(sudoku[row][col][possibleValue]);
+                    if ( sudoku[row][col][0] == 0 && sudoku[row][col][possibleValue] > 0) {
+                        list.add(sudoku[row][col][possibleValue]);
+
+                    }
                 }
 
+                // now I have a list with all possible values
+                // I need to iterate to compare with possible values from another cell
+
+                // for each col
                 for (int col2 = col + 1 ; col2 < n; col2++) {
+
                     List<Integer> list2 = new ArrayList<Integer>(n);
                     for (int possibleValue = 1; possibleValue <= n; possibleValue++) {
-                        list2.add(sudoku[row][col2][possibleValue]);
+                        if ( sudoku[row][col2][0] == 0 && sudoku[row][col2][possibleValue] > 0) {
+                            list.add(sudoku[row][col2][possibleValue]);
+
+                        }
                     }
 
+                    // order list
                     Set<Integer> set = new HashSet<>(list2);
                     list2.clear();
                     list2.addAll(set);
                     Collections.sort(list2);
 
+                    // order list
                     set = new HashSet<>(list);
                     list.clear();
                     list.addAll(set);
                     Collections.sort(list);
 
+                    // get list's size
                     int maxL = list.size();
                     int maxL2 = list2.size();
 
+                    // number of coincidences
                     int coincidence= 0;
-                    List<Integer> coincidencesList = new ArrayList<Integer>(n);
 
+
+                    // the lists must have the same size
                     if (maxL == maxL2) {
+
+                        // for each value in list
                         for (int value : list){
+
+                            // if both have same possible values save that coincidence
                             if(list2.contains(value)){
                                 coincidence ++;
                                 coincidencesList.add(value);
                             }
                         }
 
+                        // the lists must differ in one element
                         if ((maxL - coincidence) == 1) {
-                            for (int possibleValuesIndex = 1; possibleValuesIndex <= n; possibleValuesIndex++) {
-                                sudoku[row][col][possibleValuesIndex] = 0;
-                                sudoku[row][col2][possibleValuesIndex] = 0;
-                            }
 
-                            for (int i = 1; i <= maxL - 1; i++) {
+                            // maybe twins but needs to check all cells
+                            twins++;
 
-                                sudoku[row][col][i] = coincidencesList.get(i - 1);
-
+                            if (twins == 1) {
+                                twinCol1 = col;
+                                twinCol2 = col2;
+                                twinRow = row;
+                            }else {
+                                // cheack another row
+                                col = n;
+                                col2 = n;
+                                twins = 0;
                             }
                         }
                     }
@@ -154,7 +188,26 @@ public class Main {
                 }
 
             }
+
+            if (twins == 1) {
+                for (int possibleValuesIndex = 1; possibleValuesIndex <= n; possibleValuesIndex++) {
+                    sudoku[row][twinCol1][possibleValuesIndex] = 0;
+                    sudoku[row][twinCol2][possibleValuesIndex] = 0;
+                }
+
+                int it = 1;
+                for (int coincidence : coincidencesList){
+                    sudoku[row][twinCol1][it] = coincidence;
+                    sudoku[row][twinCol2][it] = coincidence;
+                    it++;
+
+                }
+
+            }
+
         }
+
+
     }
 
     private static void loneRanger() {
@@ -623,7 +676,7 @@ public class Main {
     private static void readFile() {
         try {
 
-            File myObj = new File("src/main/resources/9x9-unsolved.txt");
+            File myObj = new File("src/main/resources/9x9-unsolved-normal.txt");
             Scanner myReader = new Scanner(myObj);
             n = Integer.parseInt(myReader.nextLine());
             sqrt = (int) Math.sqrt(n);
@@ -652,7 +705,7 @@ public class Main {
 
         try {
 
-            File myObj = new File("src/main/resources/9x9-solved.txt");
+            File myObj = new File("src/main/resources/9x9-unsolved-normal.txt");
             Scanner myReader = new Scanner(myObj);
             n = Integer.parseInt(myReader.nextLine());
             sqrt = (int) Math.sqrt(n);
