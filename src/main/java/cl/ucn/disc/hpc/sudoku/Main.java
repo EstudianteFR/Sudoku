@@ -18,7 +18,6 @@ public class Main {
 
     public static void main(String[] args) {
         readFile();
-
         fillOptions();
     }
 
@@ -40,56 +39,6 @@ public class Main {
 
 
         printMatrix();
-    }
-
-    private static void test() {
-
-        int[][] generallValues = new int[n][3];
-
-        for (int i = 0; i < n; i++) {
-            generallValues[i][0] = i+1;
-            generallValues[i][1] = 0;
-            generallValues[i][2] = 0;
-        }
-
-        for (int row = 0; row < n; row++) {
-            for (int col = 0; col < n; col++) {
-
-                for (int i = 0; i < n; i++) {
-                    for (int possibleValues = 1; possibleValues <= n; possibleValues++) {
-                        if (generallValues[i][0] == sudoku[row][col][possibleValues]) {
-                            generallValues[i][1] +=1;
-                        }
-                    }
-                }
-
-            }
-            int min = n+n;
-            int posMin = 0;
-            for (int i = 0; i < n; i++) {
-                if (generallValues[i][1] > 0 && generallValues[i][1] < min) {
-                    posMin = i;
-                    min = generallValues[i][1];
-                }
-            }
-
-            if (min == 1) {
-                for (int col = 0; col < n; col++) {
-                    for (int possibleValues = 1; possibleValues <= 1; possibleValues++) {
-                        if (sudoku[row][col][possibleValues] == min){
-                            sudoku[row][col][0] = generallValues[posMin][0];
-                            cleanPossibleValues(row, col);
-                            col = n;
-
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-
-
     }
 
     private static void twins() {
