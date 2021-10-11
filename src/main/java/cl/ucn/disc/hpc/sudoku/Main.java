@@ -34,6 +34,8 @@ public class Main {
             loneRanger();
 
             twins();
+
+            triplets();
         }
 
 
@@ -77,7 +79,7 @@ public class Main {
                     List<Integer> list2 = new ArrayList<Integer>(n);
                     for (int possibleValue = 1; possibleValue <= n; possibleValue++) {
                         if ( sudoku[row][col2][0] == 0 && sudoku[row][col2][possibleValue] > 0) {
-                            list.add(sudoku[row][col2][possibleValue]);
+                            list2.add(sudoku[row][col2][possibleValue]);
 
                         }
                     }
@@ -157,6 +159,130 @@ public class Main {
         }
 
 
+    }
+    
+    private static void triplets() {
+        
+        int tripletCol1 = 0;
+        int tripletCol2 = 0;
+        int tripletCol3 = 0;
+        
+        int triplets = 0;
+
+        for (int row = 0; row < n; row++) {
+
+            // the coincidences
+            List<Integer> coincidencesList = coincidencesList = new ArrayList<Integer>(n);
+
+            for (int col = 0; col < n; col++) {
+
+                // search for possibles values
+                List<Integer> list = new ArrayList<Integer>(n);
+                for (int possibleValue = 1; possibleValue <= n; possibleValue++) {
+                    if ( sudoku[row][col][0] == 0 && sudoku[row][col][possibleValue] > 0) {
+                        list.add(sudoku[row][col][possibleValue]);
+
+                    }
+                }
+
+                for (int col2 = col + 1; col2 < n - 1; col2++) {
+
+                    int col3 = col2 + 1;
+                    
+                    List<Integer> list2 = new ArrayList<Integer>(n);
+                    List<Integer> list3 = new ArrayList<Integer>(n);
+                    
+                    for (int possibleValue = 1; possibleValue <= n; possibleValue++) {
+                        if ( sudoku[row][col2][0] == 0 && sudoku[row][col2][possibleValue] > 0) {
+                            list2.add(sudoku[row][col2][possibleValue]);
+
+                        }
+                    }
+
+                    for (int possibleValue = 1; possibleValue <= n; possibleValue++) {
+                        if ( sudoku[row][col3][0] == 0 && sudoku[row][col3][possibleValue] > 0) {
+                            list3.add(sudoku[row][col3][possibleValue]);
+
+                        }
+                    }
+
+
+                    // order list
+                    Set<Integer> set = new HashSet<>(list2);
+                    list2.clear();
+                    list2.addAll(set);
+                    Collections.sort(list2);
+                    
+                    // order list
+                    Set<Integer> set2 = new HashSet<>(list3);
+                    list3.clear();
+                    list3.addAll(set);
+                    Collections.sort(list3);
+
+                    // order list
+                    set = new HashSet<>(list);
+                    list.clear();
+                    list.addAll(set);
+                    Collections.sort(list);
+
+                    // get list's size
+                    int maxL = list.size();
+                    int maxL2 = list2.size();
+                    int maxL3 = list3.size();
+
+                    // number of coincidences
+                    int coincidence= 0;
+
+                    // for each value in list
+                    for (int value : list){
+
+                        // if both have same possible values save that coincidence
+                        if(list2.contains(value) && list3.contains(value)){
+                            coincidence ++;
+                            coincidencesList.add(value);
+                        }
+                    }
+
+                    // maybe twins but needs to check all cells
+                    triplets++;
+
+                    if (triplets == 1) {
+                        tripletCol1 = col;
+                        tripletCol2 = col2;
+                        tripletCol3 = col3;
+                        
+                    }else {
+                        // cheack another row
+                        col = n;
+                        col2 = n;
+                        triplets = 0;
+                    }
+                    
+                }
+                
+            }
+
+            // only there triplets
+            if (triplets == 2) {
+                for (int possibleValuesIndex = 1; possibleValuesIndex <= n; possibleValuesIndex++) {
+                    sudoku[row][tripletCol1][possibleValuesIndex] = 0;
+                    sudoku[row][tripletCol2][possibleValuesIndex] = 0;
+                    sudoku[row][tripletCol3][possibleValuesIndex] = 0;
+                }
+
+                int it = 1;
+                for (int coincidence : coincidencesList){
+                    sudoku[row][tripletCol1][it] = coincidence;
+                    sudoku[row][tripletCol2][it] = coincidence;
+                    sudoku[row][tripletCol3][it] = coincidence;
+                    it++;
+
+                }
+
+            }
+            
+        }
+        
     }
 
     private static void loneRanger() {
