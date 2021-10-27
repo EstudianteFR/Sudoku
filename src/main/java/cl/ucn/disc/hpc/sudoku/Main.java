@@ -24,53 +24,33 @@ public class Main {
 
         solution = readFile("src/main/resources/16x16-solved.txt");
         sudoku = readFile("src/main/resources/16x16-unsolved.txt");
-        printMatrix();
-        //fillOptions();
+
+        solving();
 
     }
 
-    private static void fillOptions() throws InterruptedException {
-
-        fillBox();
-        fillRow();
-        fillCol();
+    private static void solving() throws InterruptedException {
 
         // the watch
         StopWatch sw = StopWatch.createStarted();
 
-        // max cores to use
-        final int maxCores = Runtime.getRuntime().availableProcessors() + 1;
+        fillOptions();
 
-        // the executor of threads
-        final ExecutorService executor = Executors.newFixedThreadPool(maxCores);
+        while (!solved()){
 
-        for (int i = 1; i <= maxCores; i++) {
-            System.out.println("Work with "+ i +" cores");
-            while (!solved()){
-                executor.submit( () -> {
-
-                            elimination();
-
-                            loneRanger();
-                        }
-                );
-            }
+            elimination();
+            loneRanger();
 
         }
-        executor.shutdown();
-        int maxTime = 3;
-
-        if (executor.awaitTermination(maxTime, TimeUnit.SECONDS)) {
-            System.out.println("Time over! Sudoku has not resolved");
-        } else {
-            System.out.println("Sudoku not solved");
-        }
 
 
-        solve(sudoku);
+    }
 
-        printMatrix();
-        percentageSolved();
+    private static void fillOptions() {
+
+        fillBox();
+        fillRow();
+        fillCol();
     }
 
     private static void twins() {
