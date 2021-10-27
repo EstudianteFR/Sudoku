@@ -6,9 +6,6 @@ import org.apache.commons.lang3.time.StopWatch;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 @Slf4j
@@ -19,11 +16,12 @@ public class Main {
     private static int n;
     private static int sqrt;
     private static boolean solved = false;
+    private static boolean anyChange = false;
 
     public static void main(String[] args) throws InterruptedException {
 
-        solution = readFile("src/main/resources/16x16-solved.txt");
-        sudoku = readFile("src/main/resources/16x16-unsolved.txt");
+        solution = readFile("src/main/resources/9x9-solved-easy.txt");
+        sudoku = readFile("src/main/resources/9x9-unsolved-easy.txt");
 
         solving();
 
@@ -43,7 +41,8 @@ public class Main {
 
         }
 
-
+        printMatrix();
+        percentageSolved();
     }
 
     private static void fillOptions() {
@@ -315,9 +314,12 @@ public class Main {
         int colBound = 0;
         int aux = 0;
         List<Integer> possibleValues;
+        List<Integer> possibleValuesWithoutRepetitions;
+
         for (int i =0; i < n; i++) {
-            possibleValues = new ArrayList<Integer>(n*n);
-            if (aux == sqrt){
+            possibleValues = new ArrayList<Integer>(n * n);
+            possibleValuesWithoutRepetitions = new ArrayList<Integer>(n * n);
+            if (aux == sqrt) {
                 rowBound += sqrt;
                 aux = 0;
                 colBound = 0;
@@ -325,71 +327,72 @@ public class Main {
 
             int itRow = 0;
 
-            for (int j = rowBound; itRow < sqrt; j++, itRow++){
+            for (int j = rowBound; itRow < sqrt; j++, itRow++) {
                 int itCol = 0;
                 for (int k = colBound; itCol < sqrt; k++, itCol++) {
                     int value = sudoku[j][k][0];
-                    if (value == 0){
+                    if (value == 0) {
                         for (int l = 1; l <= n; l++) {
                             int possibleValue = sudoku[j][k][l];
                             if (possibleValue > 0) {
                                 possibleValues.add(possibleValue);
+                                possibleValuesWithoutRepetitions.add(possibleValue);
                             }
                         }
                     }
                 }
             }
-            Set<Integer> set =  new HashSet<Integer>(possibleValues);
+            Set<Integer> set = new HashSet<Integer>(possibleValues);
             possibleValues.clear();
             possibleValues.addAll(set);
-            int auxSize =  possibleValues.size();
 
-            int auxList[][] = new int[auxSize][2];
-            for (int j = 0; j < auxSize; j++) {
-                auxList[j][0] = possibleValues.get(j);
+            // Store the unique value
+            int unique = -1;
+
+            // Count that help to look a unique value
+            int counter = 0;
+
+            // For each possible value
+            for (int value : possibleValues) {
+                counter = 0;
+
+                // For each possible value without repetition
+                for (int v : possibleValuesWithoutRepetitions) {
+
+                    if (value == v) {
+                        counter++;
+                    }
+
+                }
+
+                // There are only one repetition
+                if (counter == 1) {
+                    unique = value;
+                    break;
+                }
             }
 
             itRow = 0;
-            for (int j = rowBound; itRow < sqrt; j++, itRow++){
+
+            for (int j = rowBound; itRow < sqrt; j++, itRow++) {
                 int itCol = 0;
                 for (int k = colBound; itCol < sqrt; k++, itCol++) {
                     int value = sudoku[j][k][0];
-                    if (value == 0){
+                    if (value == 0) {
                         for (int l = 1; l <= n; l++) {
-                            int val = sudoku[j][k][l];
-                            if (val > 0) {
-                                int index = possibleValues.indexOf(val);
-                                auxList[index][1] += 1;
-                            }
 
+                            if(sudoku[j][k][l] == unique) {
+                                sudoku[j][k][0] = unique;
+                                cleanPossibleValues(j,k);
+                                log.debug("Cambio por LoneRanger BOX");
+                                return;
+                            }
 
                         }
                     }
                 }
             }
-            for (int m = 0; m < auxSize; m++) {
-                if (auxList[m][1] == 1) {
-                    itRow = 0;
-                    for (int j = rowBound; itRow < sqrt; j++, itRow++){
-                        int itCol = 0;
-                        for (int k = colBound; itCol < sqrt; k++, itCol++) {
-                            int value = sudoku[j][k][0];
-                            if (value == 0){
-                                for (int l = 1; l <= n; l++) {
-                                    int val = sudoku[j][k][l];
-                                    if (val == auxList[m][0]) {
 
-                                        sudoku[j][k][0] = val;
-                                        cleanPossibleValues(j,k);
-                                    }
-
-
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         }
 
     }
@@ -397,10 +400,12 @@ public class Main {
     private static void loneRangerRow() {
 
         List<Integer> possibleValues;
+        List<Integer> possibleValuesWithoutRepetitions;
 
         // for each row
         for (int row = 0; row < n; row++) {
-            possibleValues = new ArrayList<Integer>(n*n);
+            possibleValues = new ArrayList<Integer>(n * n);
+            possibleValuesWithoutRepetitions = new ArrayList<Integer>(n * n);
 
             // for each col
             for (int col = 0; col < n; col++) {
@@ -410,199 +415,154 @@ public class Main {
                     int possibleValue = sudoku[row][col][indexPossibleValue];
                     if (possibleValue > 0) {
                         possibleValues.add(possibleValue);
+                        possibleValuesWithoutRepetitions.add(possibleValue);
                     }
                 }
+
+
             }
 
             // now I have all possible values of all row
 
             // remove duplicates
-            Set<Integer> set =  new HashSet<Integer>(possibleValues);
+            Set<Integer> set = new HashSet<Integer>(possibleValues);
             possibleValues.clear();
             possibleValues.addAll(set);
 
+            // Store the unique value
+            int unique = -1;
 
-            int auxSize =  possibleValues.size();
+            // Count that help to look a unique value
+            int counter = 0;
 
-            // list to count repetitions
-            int uniquesList[][] = new int[auxSize][2];
+            // For each possible value
+            for (int value : possibleValues) {
+                counter = 0;
 
-            // initialize with zero for each no repetition value
-            for (int j = 0; j < auxSize; j++) {
-                uniquesList[j][0] = possibleValues.get(j);
-                uniquesList[j][1] = 0;
-            }
+                // For each possible value without repetition
+                for (int v : possibleValuesWithoutRepetitions) {
 
-            // looking where are the possible values for columns
-            for (int col = 0; col < n; col++) {
-
-                // for each possible values increment counter
-                for (int l = 1; l <= n; l++) {
-                    int val = sudoku[row][col][l];
-                    if (val > 0) {
-                        int index = possibleValues.indexOf(val);
-                        uniquesList[index][1] += 1;
+                    if (value == v) {
+                        counter++;
                     }
 
                 }
+
+                // There are only one repetition
+                if (counter == 1) {
+                    unique = value;
+                    break;
+                }
             }
 
-            // now I have all unique values with his counter in matrix auxList with size auxSize
+            // If there are only one repetition
+            if (counter == 1) {
 
-            // for each unique value
-            for (int m = 0; m < auxSize; m++) {
+                // for each column
+                for (int col = 0; col < n; col++) {
 
-                int countUniqueValue = uniquesList[m][1];
-                int uniqueValue = uniquesList[m][0];
+                    // For each possible value in [row][column]
+                    for (int i = 1; i <= n; i++) {
 
-                // if a unique value its repeat only one time
-                if (countUniqueValue == 1) {
+                        // The unique value belongs to [row][col][i]
+                        if (unique == sudoku[row][col][i]) {
 
-                    // search where is the unique value
-                    possibleValues = new ArrayList<Integer>(n*n);
-
-                    // for each column
-                    for (int col = 0; col < n; col++) {
-
-
-
-                        // save the  value
-                        int value = sudoku[row][col][0];
-
-                        // if a cell is free
-                        if (value == 0){
-
-                            // for all possible values in its cell
-                            for (int l = 1; l <= n; l++) {
-
-                                // save a possible value
-                                int val = sudoku[row][col][l];
-
-                                // if possible value coincide with the unique value
-                                if (val == uniqueValue) {
-
-
-                                    sudoku[row][col][0] = uniqueValue;
-                                    cleanPossibleValues(row,col);
-                                    uniquesList[m][1] = -1;
-                                    break;
-                                }
-
-
-                            }
-
+                            sudoku[row][col][0] = unique;
+                            cleanPossibleValues(row,col);
+                            log.debug("Cambio por LoneRanger ROW");
+                            return;
                         }
                     }
-
                 }
             }
+
         }
+
     }
 
     private static void loneRangerCol() {
 
         List<Integer> possibleValues;
+        List<Integer> possibleValuesWithoutRepetitions;
 
-        // for each row
+        // for each col
         for (int col = 0; col < n; col++) {
-            possibleValues = new ArrayList<Integer>(n*n);
+            possibleValues = new ArrayList<Integer>(n * n);
+            possibleValuesWithoutRepetitions = new ArrayList<Integer>(n * n);
 
             // for each col
             for (int row = 0; row < n; row++) {
 
-                // search for possible values for sudoku[row][col]
+                // search for possible values for sudoku[col][row]
                 for (int indexPossibleValue = 1; indexPossibleValue <= n; indexPossibleValue++) {
                     int possibleValue = sudoku[row][col][indexPossibleValue];
                     if (possibleValue > 0) {
                         possibleValues.add(possibleValue);
+                        possibleValuesWithoutRepetitions.add(possibleValue);
                     }
                 }
+
+
             }
 
-            // now I have all possible values of all row
+            // now I have all possible values of all col
 
             // remove duplicates
-            Set<Integer> set =  new HashSet<Integer>(possibleValues);
+            Set<Integer> set = new HashSet<Integer>(possibleValues);
             possibleValues.clear();
             possibleValues.addAll(set);
 
+            // Store the unique value
+            int unique = -1;
 
-            int auxSize =  possibleValues.size();
+            // Count that help to look a unique value
+            int counter = 0;
 
-            // list to count repetitions
-            int uniquesList[][] = new int[auxSize][2];
+            // For each possible value
+            for (int value : possibleValues) {
+                counter = 0;
 
-            // initialize with zero for each no repetition value
-            for (int j = 0; j < auxSize; j++) {
-                uniquesList[j][0] = possibleValues.get(j);
-                uniquesList[j][1] = 0;
-            }
+                // For each possible value without repetition
+                for (int v : possibleValuesWithoutRepetitions) {
 
-            // looking where are the possible values for columns
-            for (int row = 0; row < n; row++) {
-
-                // for each possible values increment counter
-                for (int l = 1; l <= n; l++) {
-                    int val = sudoku[row][col][l];
-                    if (val > 0) {
-                        int index = possibleValues.indexOf(val);
-                        uniquesList[index][1] += 1;
+                    if (value == v) {
+                        counter++;
                     }
 
                 }
+
+                // There are only one repetition
+                if (counter == 1) {
+                    unique = value;
+                    break;
+                }
             }
 
-            // now I have all unique values with his counter in matrix auxList with size auxSize
+            // If there are only one repetition
+            if (counter == 1) {
 
-            // for each unique value
-            for (int m = 0; m < auxSize; m++) {
+                // for each row
+                for (int row = 0; row < n; row++) {
 
-                int countUniqueValue = uniquesList[m][1];
-                int uniqueValue = uniquesList[m][0];
+                    // For each possible value in [col][column]
+                    for (int i = 1; i <= n; i++) {
 
-                // if a unique value its repeat only one time
-                if (countUniqueValue == 1) {
+                        // The unique value belongs to [col][row][i]
+                        if (unique == sudoku[row][col][i]) {
 
-                    // search where is the unique value
-                    possibleValues = new ArrayList<Integer>(n*n);
-
-                    // for each column
-                    for (int row = 0; row < n; row++) {
-
-
-                        // save the  value
-                        int value = sudoku[row][col][0];
-
-                        // if a cell is free
-                        if (value == 0){
-
-                            // for all possible values in its cell
-                            for (int l = 1; l <= n; l++) {
-
-                                // save a possible value
-                                int val = sudoku[row][col][l];
-
-                                // if possible value coincide with the unique value
-                                if (val == uniqueValue) {
-
-
-                                    sudoku[row][col][0] = uniqueValue;
-                                    cleanPossibleValues(row,col);
-                                    uniquesList[m][1] = -1;
-                                    break;
-                                }
-
-
-                            }
-
+                            sudoku[row][col][0] = unique;
+                            cleanPossibleValues(row,col);
+                            log.debug("Cambio por LoneRanger COL");
+                            return;
                         }
                     }
-
                 }
             }
+
         }
 
     }
+
 
     private static void elimination() {
         for (int row = 0; row < n; row++) {
@@ -905,7 +865,7 @@ public class Main {
             }
 
         }
-
+        anyChange = true;
     }
 
     private static boolean solved() {
