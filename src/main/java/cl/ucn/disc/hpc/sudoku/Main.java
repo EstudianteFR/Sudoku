@@ -20,10 +20,11 @@ public class Main {
 
     public static void main(String[] args) throws InterruptedException {
 
-        solution = readFile("src/main/resources/9x9-solved-easy.txt");
-        sudoku = readFile("src/main/resources/9x9-unsolved-easy.txt");
+        solution = readFile("src/main/resources/9x9-solved-very-hard.txt");
+        sudoku = readFile("src/main/resources/9x9-unsolved-very-hard.txt");
 
         solving();
+        //gemelos();
 
     }
 
@@ -36,8 +37,17 @@ public class Main {
 
         while (!solved()){
 
+            anyChange = false;
+
             elimination();
-            loneRanger();
+
+            if (!anyChange) loneRangerBox();
+
+            if (!anyChange) loneRangerCol();
+
+            if (!anyChange) loneRangerRow();
+
+            if (!anyChange) gemelos();
 
         }
 
@@ -50,6 +60,117 @@ public class Main {
         fillBox();
         fillRow();
         fillCol();
+    }
+
+    private static void gemelos() {
+
+        for (int row = 0; row < n; row++) {
+
+            //log.debug("row: {}", row);
+
+            for (int col = 0; col < n -1; col++) {
+
+                List<Integer> possibleValues = new ArrayList<Integer>(n);
+                List<Integer> twinPossibleValues = new ArrayList<Integer>();
+                //log.debug("     col: {}", col);
+
+                for (int i = 1; i <= n; i++) {
+                    int v = sudoku[row][col][i];
+                    if (v > 0) {
+                        possibleValues.add(v);
+                    }
+                }
+
+                int counterTwins = 0;
+                int colTwin = -1;
+                for (int col2 = col + 1; col2 < n; col2++) {
+                    List<Integer> possibleValues2 = new ArrayList<Integer>(n);
+                    possibleValues2 = new ArrayList<Integer>(n);
+                    //log.debug("         col2: {}", col2);
+
+                    for (int i = 1; i <= n; i++) {
+                        int v = sudoku[row][col2][i];
+                        if (v > 0) {
+                            possibleValues2.add(v);
+                        }
+                    }
+
+                    if (
+                            (possibleValues.size() == 2 && possibleValues2.size() == 3) ||
+                            (possibleValues.size() == 3 && possibleValues2.size() == 2) ||
+                            (possibleValues.size() == 3 && possibleValues2.size() == 3)
+                    ) {
+                        int counter = 0;
+                        for (int v : possibleValues) {
+                            for (int v2 : possibleValues2) {
+                                if (v == v2) {
+                                    counter++;
+                                }
+                            }
+                        }
+
+                        if (counter == 2) {
+                            counterTwins++;
+                            log.debug("counterTwins++");
+                            colTwin = col2;
+                            twinPossibleValues = new ArrayList<Integer>(possibleValues2);
+                            if (counterTwins > 1){
+                                log.debug("if (counterTwins > 1)");
+                                return;
+                            }
+                        }
+                    }
+
+                }
+
+                if (counterTwins == 1) {
+
+                    // Si las listas son de tamanio 2 no nos sirven
+
+
+
+                    // Ahora debemos asegurarnos que no compartan valores posibles
+
+                    List<Integer> allPossibleValues = new ArrayList<Integer>(n);
+                    for (int col3 = 0; col3 < n; col3++) {
+
+                        if (col3 != col && col3 != colTwin) {
+                            for (int i = 1; i <= n; i++) {
+                                allPossibleValues.add(sudoku[row][col3][i]);
+                            }
+                        }
+                    }
+
+                    allPossibleValues.removeAll(Collections.singleton(0));
+
+                    boolean twins = false;
+
+                    int aux = 0;
+                    for (int v : possibleValues) {
+                        for (int vt : twinPossibleValues) {
+                            for (int a : allPossibleValues) {
+                                if (v == vt && v == a) {
+                                    log.debug("aux++");
+                                    aux++;
+                                }
+                            }
+                        }
+                    }
+
+                    // TODO: Check method, this situation is not checkable
+                    log.debug("HOLA");
+                    if (aux == 0) {
+                        twins = true;
+                    }
+
+                }
+
+            }
+
+
+
+        }
+
     }
 
     private static void twins() {
@@ -563,7 +684,6 @@ public class Main {
 
     }
 
-
     private static void elimination() {
         for (int row = 0; row < n; row++) {
             for (int col = 0; col < n; col++) {
@@ -584,8 +704,9 @@ public class Main {
                     }
                     if (counter == 1){
                         sudoku[row][col][0] = num;
-
                         cleanPossibleValues(row, col);
+                        log.debug("Cambio por ELIMINATION");
+                        return;
                     }
 
                 }
@@ -866,6 +987,7 @@ public class Main {
 
         }
         anyChange = true;
+        printMatrix();
     }
 
     private static boolean solved() {
