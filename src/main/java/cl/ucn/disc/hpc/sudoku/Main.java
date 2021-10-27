@@ -22,8 +22,10 @@ public class Main {
 
     public static void main(String[] args) throws InterruptedException {
 
-        readFile();
-        fillOptions();
+        solution = readFile("src/main/resources/16x16-solved.txt");
+        sudoku = readFile("src/main/resources/16x16-unsolved.txt");
+        printMatrix();
+        //fillOptions();
 
     }
 
@@ -780,14 +782,21 @@ public class Main {
 
     }
 
-    private static void readFile() {
+    /**
+     * Read a text file and populate the board
+     * @param path of file
+     * @return populated board
+     */
+    private static int[][][] readFile(String path) {
+
+        int[][][] board = new int[0][][];
         try {
 
-            File myObj = new File("src/main/resources/16x16-unsolved.txt");
+            File myObj = new File(path);
             Scanner myReader = new Scanner(myObj);
             n = Integer.parseInt(myReader.nextLine());
             sqrt = (int) Math.sqrt(n);
-            sudoku = new int[n][n][n+1];
+            board = new int[n][n][n+1];
 
             for(int i =0; i < n; i++) {
                 String line = myReader.nextLine();
@@ -798,46 +807,18 @@ public class Main {
                     if (line.charAt(j) != ','){
                         numStr += line.charAt(j);
                     }else{
-                        sudoku[i][col][0] = Integer.parseInt(numStr);
+                        board[i][col][0] = Integer.parseInt(numStr);
                         col++;
                         numStr = "";
                     }
                 }
 
-                sudoku[i][col][0] = Integer.parseInt(numStr);
+                board[i][col][0] = Integer.parseInt(numStr);
 
             }} catch (FileNotFoundException e) {
             System.out.println("An error occurred.");
         }
-
-        try {
-
-            File myObj = new File("src/main/resources/16x16-solved.txt");
-            Scanner myReader = new Scanner(myObj);
-            n = Integer.parseInt(myReader.nextLine());
-            sqrt = (int) Math.sqrt(n);
-            solution = new int[n][n][n+1];
-
-            for(int i =0; i < n; i++) {
-                String line = myReader.nextLine();
-                int size = line.length();
-                String numStr = "";
-                int col = 0;
-                for(int j = 0; j < size; j++){
-                    if (line.charAt(j) != ','){
-                        numStr += line.charAt(j);
-                    }else{
-                        solution[i][col][0] = Integer.parseInt(numStr);
-                        col++;
-                        numStr = "";
-                    }
-                }
-
-                solution[i][col][0] = Integer.parseInt(numStr);
-
-            }} catch (FileNotFoundException e) {
-            System.out.println("An error occurred.");
-        }
+        return board;
     }
 
     private static void printMatrix() {
