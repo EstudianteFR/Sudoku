@@ -47,7 +47,7 @@ public class Main {
 
             if (!anyChange) loneRangerRow();
 
-            if (!anyChange) gemelos();
+            //if (!anyChange) gemelos();
 
         }
 
@@ -904,28 +904,22 @@ public class Main {
 
     private static void cleanPossibleValues (int row, int col){
 
-
         int val = sudoku[row][col][0];
-
 
         // clean in r,col
         for (int r = 0; r < n; r++) {
             for (int possibleValues = 1; possibleValues <= n; possibleValues++) {
-                if(sudoku[r][col][possibleValues] == val) {
-                    sudoku[r][col][possibleValues] = 0;
-                }
+                sudoku[r][col][possibleValues] = 0;
             }
         }
+
 
         // clean in c, row
         for (int c = 0; c < n; c++) {
             for (int possibleValues = 1; possibleValues <= n; possibleValues++) {
-                if(sudoku[row][c][possibleValues] == val) {
-                    sudoku[row][c][possibleValues] = 0;
-                }
+                sudoku[row][c][possibleValues] = 0;
             }
         }
-
 
         int rowBound = 0;
         int colBound = 0;
@@ -966,14 +960,15 @@ public class Main {
 
         int it = 0;
         int aux2 = boxIndexC;
+        int aux3 = boxIndexR;
         for (int r = 0; r < sqrt; r++) {
             for (int c = 0; c < sqrt; c++) {
 
+                //log.debug("Row: {}    Col: {}", boxIndexR, boxIndexC);
+
                 for (int possibleValues = 1; possibleValues <= n; possibleValues++) {
 
-                    if (val == sudoku[boxIndexR][boxIndexC][possibleValues]) {
-                        sudoku[boxIndexR][boxIndexC][possibleValues] = 0;
-                    }
+                    sudoku[boxIndexR][boxIndexC][possibleValues] = 0;
                 }
 
                 boxIndexC++;
@@ -987,7 +982,6 @@ public class Main {
 
         }
         anyChange = true;
-        printMatrix();
     }
 
     private static boolean solved() {
