@@ -20,8 +20,8 @@ public class Main {
 
     public static void main(String[] args) throws InterruptedException {
 
-        solution = readFile("src/main/resources/9x9-solved-very-hard.txt");
-        sudoku = readFile("src/main/resources/9x9-unsolved-very-hard.txt");
+        solution = readFile("src/main/resources/9x9-solved-normal.txt");
+        sudoku = readFile("src/main/resources/9x9-unsolved-normal.txt");
 
         solving();
         //gemelos();
@@ -906,18 +906,26 @@ public class Main {
 
         int val = sudoku[row][col][0];
 
+        // clean the own possible values
+        for (int possibleValues = 1; possibleValues <= n; possibleValues++) {
+            sudoku[row][col][possibleValues] = 0;
+        }
+
         // clean in r,col
         for (int r = 0; r < n; r++) {
             for (int possibleValues = 1; possibleValues <= n; possibleValues++) {
-                sudoku[r][col][possibleValues] = 0;
+                if (val == sudoku[r][col][possibleValues]) {
+                    sudoku[r][col][possibleValues] = 0;
+                }
             }
         }
-
 
         // clean in c, row
         for (int c = 0; c < n; c++) {
             for (int possibleValues = 1; possibleValues <= n; possibleValues++) {
-                sudoku[row][c][possibleValues] = 0;
+                if (val == sudoku[row][c][possibleValues]) {
+                    sudoku[row][c][possibleValues] = 0;
+                }
             }
         }
 
@@ -967,8 +975,9 @@ public class Main {
                 //log.debug("Row: {}    Col: {}", boxIndexR, boxIndexC);
 
                 for (int possibleValues = 1; possibleValues <= n; possibleValues++) {
-
-                    sudoku[boxIndexR][boxIndexC][possibleValues] = 0;
+                    if (val == sudoku[boxIndexR][boxIndexC][possibleValues]) {
+                        sudoku[boxIndexR][boxIndexC][possibleValues] = 0;
+                    }
                 }
 
                 boxIndexC++;
