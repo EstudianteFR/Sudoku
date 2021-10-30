@@ -20,11 +20,13 @@ public class Main {
 
     public static void main(String[] args) throws InterruptedException {
 
-        solution = readFile("src/main/resources/9x9-solved-normal.txt");
-        sudoku = readFile("src/main/resources/9x9-unsolved-normal.txt");
+        solution = readFile("src/main/resources/9x9-solved-very-hard.txt");
+        sudoku = readFile("src/main/resources/9x9-unsolved-very-hard.txt");
+        //solution = readFile("src/main/resources/16x16-solved.txt");
+        //sudoku = readFile("src/main/resources/16x16-unsolved.txt");
+
 
         solving();
-        //gemelos();
 
     }
 
@@ -35,24 +37,23 @@ public class Main {
 
         fillOptions();
 
-        while (!solved()){
+        while (!solved()) {
 
             anyChange = false;
+            twins();
 
             elimination();
 
-            if (!anyChange) loneRangerBox();
+            loneRangerBox();
 
-            if (!anyChange) loneRangerCol();
+            loneRangerCol();
 
-            if (!anyChange) loneRangerRow();
+            loneRangerRow();
 
-            //if (!anyChange) gemelos();
-
+            percentageSolved();
         }
 
         printMatrix();
-        percentageSolved();
     }
 
     private static void fillOptions() {
@@ -62,18 +63,19 @@ public class Main {
         fillCol();
     }
 
-    private static void gemelos() {
+    private static void twins() {
 
+        // for each row
         for (int row = 0; row < n; row++) {
 
-            //log.debug("row: {}", row);
-
+            // for each column
             for (int col = 0; col < n -1; col++) {
 
+                // List for twins possible values
                 List<Integer> possibleValues = new ArrayList<Integer>(n);
                 List<Integer> twinPossibleValues = new ArrayList<Integer>();
-                //log.debug("     col: {}", col);
 
+                // Search the possibles values for the actual column col
                 for (int i = 1; i <= n; i++) {
                     int v = sudoku[row][col][i];
                     if (v > 0) {
@@ -83,11 +85,14 @@ public class Main {
 
                 int counterTwins = 0;
                 int colTwin = -1;
+
+                // For each next columns
                 for (int col2 = col + 1; col2 < n; col2++) {
+
                     List<Integer> possibleValues2 = new ArrayList<Integer>(n);
                     possibleValues2 = new ArrayList<Integer>(n);
-                    //log.debug("         col2: {}", col2);
 
+                    // Search the possible values
                     for (int i = 1; i <= n; i++) {
                         int v = sudoku[row][col2][i];
                         if (v > 0) {
@@ -95,11 +100,18 @@ public class Main {
                         }
                     }
 
-                    if (
-                            (possibleValues.size() == 2 && possibleValues2.size() == 3) ||
+                    /**
+                     * Twins are possible only if there are 3 or 2 possibles values from each twin.
+                     * The possible size of possibles values are
+                     *      * twin1 with 3 possible values and twin2 with 3 possible values
+                     *      * twin1 with 2 possible values and twin2 with 3 possible values
+                     *      * twin1 with 3 possible values and twin2 with 2 possible values
+                     */
+                    if ((possibleValues.size() == 2 && possibleValues2.size() == 3) ||
                             (possibleValues.size() == 3 && possibleValues2.size() == 2) ||
-                            (possibleValues.size() == 3 && possibleValues2.size() == 3)
-                    ) {
+                             possibleValues.size() == 3 && possibleValues2.size() == 3) {
+
+                        // Coincidences possible values for col and col1
                         int counter = 0;
                         for (int v : possibleValues) {
                             for (int v2 : possibleValues2) {
@@ -109,28 +121,28 @@ public class Main {
                             }
                         }
 
+                        // If exist only 2 coincidences maybe are twins
                         if (counter == 2) {
+
+                            //Twins only works for 1 pair of twins
                             counterTwins++;
-                            log.debug("counterTwins++");
+
+                            // Save the column of the possible twin
                             colTwin = col2;
                             twinPossibleValues = new ArrayList<Integer>(possibleValues2);
-                            if (counterTwins > 1){
-                                log.debug("if (counterTwins > 1)");
-                                return;
-                            }
+
+                            // If there are triplets end twins
+                            if (counterTwins > 1) return;
+
                         }
                     }
 
                 }
 
+                // Only one pair of twins
                 if (counterTwins == 1) {
 
-                    // Si las listas son de tamanio 2 no nos sirven
-
-
-
-                    // Ahora debemos asegurarnos que no compartan valores posibles
-
+                    // Search for all possibles values for all columns in that row
                     List<Integer> allPossibleValues = new ArrayList<Integer>(n);
                     for (int col3 = 0; col3 < n; col3++) {
 
@@ -141,156 +153,94 @@ public class Main {
                         }
                     }
 
+                    // Remove zeros
                     allPossibleValues.removeAll(Collections.singleton(0));
 
-                    boolean twins = false;
-
+                    // If twin's possibles values are in other possible values ends twins
                     int aux = 0;
                     for (int v : possibleValues) {
                         for (int vt : twinPossibleValues) {
                             for (int a : allPossibleValues) {
                                 if (v == vt && v == a) {
-                                    log.debug("aux++");
-                                    aux++;
+                                    return;
                                 }
                             }
                         }
                     }
 
-                    // TODO: Check method, this situation is not checkable
-                    log.debug("HOLA");
-                    if (aux == 0) {
-                        twins = true;
+                    //Remove zeros and order
+                    Set<Integer> set = new HashSet<Integer>(possibleValues);
+                    possibleValues.clear();
+                    possibleValues.addAll(set);
+
+                    Set<Integer> set2 = new HashSet<Integer>(twinPossibleValues);
+                    twinPossibleValues.clear();
+                    twinPossibleValues.addAll(set2);
+
+                    // If they are twins by 2 or 3 values
+                    boolean twinsTriplet = (possibleValues.size() == 3) && (twinPossibleValues.size() == 3);
+                    boolean twinsDuple = (possibleValues.size() == 3) && (twinPossibleValues.size() == 2) ||
+                            (possibleValues.size() == 2) && (twinPossibleValues.size() == 3);
+
+                    // If they are twins by three values
+                    if (twinsTriplet) {
+
+                        // Index to remove in list
+                        int index1 = 0;
+                        int index2 = 0;
+
+                        // Search index to remove
+                        for (int i = 0; i < 3; i++) {
+                            int j = 0;
+                            for (j = 0; j < 3; j++) {
+                                if (possibleValues.get(i) == twinPossibleValues.get(j)) {
+                                    break;
+                                }
+                            }
+                            if (j == 3) {
+                                index1 = i;
+                                break;
+                            }
+                        }
+
+                        // Search index to remove
+                        for (int i = 0; i < 3; i++) {
+                            int j = 0;
+                            for (j = 0; j < 3; j++) {
+                                if (possibleValues.get(j) == twinPossibleValues.get(i)) {
+                                    break;
+                                }
+                            }
+                            if (j == 3) {
+                                index2 = i;
+                                break;
+                            }
+                        }
+
+                        // Get values to remove in each twin
+                        int valToRemove1 = possibleValues.get(index1);
+                        int valToRemove2 = twinPossibleValues.get(index2);
+
+                        // Remove the possible values from the twins
+                        for (int i = 1; i <= n; i++) {
+                            int posValueToRemove = sudoku[row][col][i];
+                            int posValueToRemove2 = sudoku[row][colTwin][i];
+                            if (posValueToRemove == valToRemove1) {
+                                sudoku[row][col][i] = 0;
+                            }
+
+                            if (posValueToRemove2 == valToRemove2) {
+                                sudoku[row][colTwin][i] = 0;
+                            }
+                        }
+                        anyChange = true;
+                        return;
                     }
-
                 }
-
             }
-
-
-
         }
-
     }
 
-    private static void twins() {
-
-        for (int row = 0; row < n; row++) {
-
-            // list to count quantity of each possible values
-            int list[][] = new int[n][3];
-            for (int i = 0; i < n; i++) {
-                list[i][0] = i + 1;
-                list[i][1] = 0;
-            }
-
-            for (int col = 0; col < n; col++) {
-
-                for (int indexPosVal = 1; indexPosVal <= n; indexPosVal++) {
-
-                    // the cell have not value
-                    if (sudoku[row][col][0] == 0){
-                        int index = sudoku[row][col][indexPosVal];
-                        if (index > 0) {
-                            list[index - 1][1] += 1;
-                        }
-                    }
-
-                }
-            }
-
-            int countListRep = 0;
-            // search for values with 2 repetitions
-            for (int i = 0; i < n; i++) {
-                if (list[i][1] == 2){
-                    list[i][2] += 1;
-                    countListRep++;
-                }
-            }
-
-            if (countListRep > 1) {
-
-
-
-                // for each value with 2 repetitions
-                for (int i = 0; i < n; i++) {
-                    if (list[i][2] == 1){
-
-                        // value with 2 repetitions
-                        int value2 = list[i][0];
-                        int twinCol1 = -1;
-                        int twinCol2 = -1;
-
-                        // find the column that have a repetition
-                        for (int col = 0; col < n; col++) {
-
-
-                            if (sudoku[row][col][0] == 0) {
-                                for (int indexPosVal = 1; indexPosVal <= n; indexPosVal++) {
-                                    if (sudoku[row][col][indexPosVal] == value2){
-                                        if (twinCol1 == -1) {
-                                            twinCol1 = col;
-                                        }else{
-                                            twinCol2 = col;
-                                        }
-                                    }
-                                }
-
-                            }
-
-
-                        }
-
-                        if (twinCol1 > 0 && twinCol2 >0){
-
-                            int quantityPosValTwin1 = 0;
-                            int quantityPosValTwin2 = 0;
-
-                            for (int indexPosVal = 1; indexPosVal <= n; indexPosVal++) {
-                                if (sudoku[row][twinCol1][indexPosVal]> 0){
-                                    quantityPosValTwin1 += 1;
-                                }if (sudoku[row][twinCol2][indexPosVal]> 0){
-                                    quantityPosValTwin2 += 1;
-                                }
-
-                            }
-
-                            int realTwins = 0;
-                            if (quantityPosValTwin1 == 2 || quantityPosValTwin1 == 3){
-                                if (quantityPosValTwin2 == 2 || quantityPosValTwin2 == 3){
-                                    if (quantityPosValTwin1 != quantityPosValTwin2){
-                                        for (int j = 1; j <= n; j++) {
-                                            for (int k = 1; k <= n; k++) {
-
-                                                if (sudoku[row][twinCol1][j] == sudoku[row][twinCol2][k]){
-
-
-                                                    if (sudoku[row][twinCol1][j]  != 0 &&  list[sudoku[row][twinCol1][j] -  1][2] == 1){
-                                                        realTwins++;
-                                                    }
-                                                }
-                                            }
-
-
-                                        }
-
-                                    }
-                                }
-                            }
-                            if (realTwins == 2) {
-                                log.debug("Twins by {}", value2);
-
-                            }
-
-                        }
-                    }
-                }
-            }
-
-        }
-
-    }
-    
     private static void triplets() {
         
         int tripletCol1 = 0;
